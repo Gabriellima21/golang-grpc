@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PublicacaoServiceClient interface {
-	UpvotePublicacao(ctx context.Context, in *PublicacaoRequest, opts ...grpc.CallOption) (*PublicacaoResponse, error)
+	UpvotePublicacao(ctx context.Context, in *UpvoteRequest, opts ...grpc.CallOption) (*PublicacaoResponse, error)
+	CreatePublicacao(ctx context.Context, in *PublicacaoRequest, opts ...grpc.CallOption) (*PublicacaoResponse, error)
 }
 
 type publicacaoServiceClient struct {
@@ -33,9 +34,18 @@ func NewPublicacaoServiceClient(cc grpc.ClientConnInterface) PublicacaoServiceCl
 	return &publicacaoServiceClient{cc}
 }
 
-func (c *publicacaoServiceClient) UpvotePublicacao(ctx context.Context, in *PublicacaoRequest, opts ...grpc.CallOption) (*PublicacaoResponse, error) {
+func (c *publicacaoServiceClient) UpvotePublicacao(ctx context.Context, in *UpvoteRequest, opts ...grpc.CallOption) (*PublicacaoResponse, error) {
 	out := new(PublicacaoResponse)
 	err := c.cc.Invoke(ctx, "/publicacao.PublicacaoService/UpvotePublicacao", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *publicacaoServiceClient) CreatePublicacao(ctx context.Context, in *PublicacaoRequest, opts ...grpc.CallOption) (*PublicacaoResponse, error) {
+	out := new(PublicacaoResponse)
+	err := c.cc.Invoke(ctx, "/publicacao.PublicacaoService/CreatePublicacao", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +56,8 @@ func (c *publicacaoServiceClient) UpvotePublicacao(ctx context.Context, in *Publ
 // All implementations must embed UnimplementedPublicacaoServiceServer
 // for forward compatibility
 type PublicacaoServiceServer interface {
-	UpvotePublicacao(context.Context, *PublicacaoRequest) (*PublicacaoResponse, error)
+	UpvotePublicacao(context.Context, *UpvoteRequest) (*PublicacaoResponse, error)
+	CreatePublicacao(context.Context, *PublicacaoRequest) (*PublicacaoResponse, error)
 	mustEmbedUnimplementedPublicacaoServiceServer()
 }
 
@@ -54,8 +65,11 @@ type PublicacaoServiceServer interface {
 type UnimplementedPublicacaoServiceServer struct {
 }
 
-func (UnimplementedPublicacaoServiceServer) UpvotePublicacao(context.Context, *PublicacaoRequest) (*PublicacaoResponse, error) {
+func (UnimplementedPublicacaoServiceServer) UpvotePublicacao(context.Context, *UpvoteRequest) (*PublicacaoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpvotePublicacao not implemented")
+}
+func (UnimplementedPublicacaoServiceServer) CreatePublicacao(context.Context, *PublicacaoRequest) (*PublicacaoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePublicacao not implemented")
 }
 func (UnimplementedPublicacaoServiceServer) mustEmbedUnimplementedPublicacaoServiceServer() {}
 
@@ -71,7 +85,7 @@ func RegisterPublicacaoServiceServer(s grpc.ServiceRegistrar, srv PublicacaoServ
 }
 
 func _PublicacaoService_UpvotePublicacao_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PublicacaoRequest)
+	in := new(UpvoteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -83,7 +97,25 @@ func _PublicacaoService_UpvotePublicacao_Handler(srv interface{}, ctx context.Co
 		FullMethod: "/publicacao.PublicacaoService/UpvotePublicacao",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PublicacaoServiceServer).UpvotePublicacao(ctx, req.(*PublicacaoRequest))
+		return srv.(PublicacaoServiceServer).UpvotePublicacao(ctx, req.(*UpvoteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PublicacaoService_CreatePublicacao_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublicacaoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PublicacaoServiceServer).CreatePublicacao(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/publicacao.PublicacaoService/CreatePublicacao",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PublicacaoServiceServer).CreatePublicacao(ctx, req.(*PublicacaoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -98,6 +130,10 @@ var PublicacaoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpvotePublicacao",
 			Handler:    _PublicacaoService_UpvotePublicacao_Handler,
+		},
+		{
+			MethodName: "CreatePublicacao",
+			Handler:    _PublicacaoService_CreatePublicacao_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
